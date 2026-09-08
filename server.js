@@ -6,7 +6,7 @@ const { GoogleGenAI } = require('@google/genai');
 
 dotenv.config();
 
-const app = express('path');
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 const ai = new GoogleGenAI({
@@ -16,7 +16,6 @@ const ai = new GoogleGenAI({
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 // Database for crops with visual imagery
 const CROP_DATABASE = {
   'Maharashtra-Wheat-Rabi season': {
@@ -149,28 +148,66 @@ app.get('/api/cattle/diet', (req, res) => {
   }
 });
 
-app.post('/api/chat', async (req, res) => {
+// app.post('/api/chat', async (req, res) => {
+//   try {
+//     const { message } = req.body;
+//     if (!message) return res.status(400).json({ error: 'Message required' });
+
+//     const systemInstruction = `You are Krishi Mitra, an AI farm advisor for Indian farmers. Provide practical, clear, concise advice in 3-4 sentences.`;
+
+//     const response = await ai.models.generateContent({
+//       model: 'gemini-2.5-flash',
+//       contents: message,
+//       config: {
+//         systemInstruction: systemInstruction,
+//       },
+//     });
+
+//     res.json({ reply: response.text || "Sorry, I couldn't generate a response." });
+//   } catch (err) {
+//     console.error('Gemini API Error:', err);
+//     res.status(500).json({ error: 'Failed to process AI response with Gemini.' });
+//   }
+// });
+
+app.post('/api/chat', async(req, res)=>{
   try {
-    const { message } = req.body;
-    if (!message) return res.status(400).json({ error: 'Message required' });
-
-    const systemInstruction = `You are Krishi Mitra, an AI farm advisor for Indian farmers. Provide practical, clear, concise advice in 3-4 sentences.`;
-
+    const {message} = req.body;
+    if(!message){
+      return res.status(400).json({
+        error: 'Message required'
+      });
+    }
+    console.log("User message: ", message);
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       contents: message,
       config: {
-        systemInstruction: systemInstruction,
-      },
+        systemInstruction:
+        'You are Krishi mitra, an Ai farm Advisor for Indian farmers, Provide practical, clear, concise advice in 3-4 sentence.'
+      }
+    });
+    console.log("Gemini response :", response);
+    const reply = response.text;
+    console.log("Gemini text: ", reply);
+    res.json({
+      reply: reply || "Sorry , I couldn't generate a response."
     });
 
-    res.json({ reply: response.text || "Sorry, I couldn't generate a response." });
-  } catch (err) {
-    console.error('Gemini API Error:', err);
-    res.status(500).json({ error: 'Failed to process AI response with Gemini.' });
+  }
+  catch(err){
+    console.error('Gemini API Error: ', err);
+    res.status(500).json({
+      error: err.message || 'Gemini API failed'
+    });
   }
 });
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Krishi Mitra server running on http://localhost:${PORT}`);
 });
+
+
