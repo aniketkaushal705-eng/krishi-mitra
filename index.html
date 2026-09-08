@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Krishi Mitra — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0c110c; --surface: #171f16; --surface-2: #1f2a1e; --gold: #c9a227;
+    --leaf: #6fae7c; --soil: #b5773f; --sky: #6fa8c9; --text: #ece7d8;
+    --text-dim: #979b8c; --danger: #c96f5b; --radius-lg: 18px; --radius-sm: 10px;
+    --border: rgba(255,255,255,.06);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); font-family:'IBM Plex Sans', sans-serif; color:var(--text); min-height:100vh; }
+  .app{ display:flex; min-height:100vh; }
+  .sidebar{ width:220px; flex-shrink:0; background:#0a0e0a; border-right:1px solid var(--border); padding:26px 16px; display:flex; flex-direction:column; }
+  .brand{ font-family:'Fraunces', serif; font-size:20px; font-weight:600; padding:0 8px 26px; border-bottom:1px solid var(--border); margin-bottom:20px; }
+  .brand span{ color:var(--gold); }
+  .navlink{ display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:var(--radius-sm); color:var(--text-dim); font-size:14px; cursor:pointer; margin-bottom:2px; }
+  .navlink .ic{ width:8px; height:8px; border-radius:50%; background:var(--text-dim); }
+  .navlink.active{ background:var(--surface-2); color:var(--text); }
+  .navlink.active .ic{ background:var(--gold); }
+  .sidebar-foot{ margin-top:auto; padding:14px 12px; background:var(--surface); border-radius:var(--radius-sm); font-size:12px; color:var(--text-dim); }
+  .sidebar-foot .name{ color:var(--text); font-size:13px; margin-bottom:2px; }
+  .main{ flex:1; padding:34px 44px; max-width:1120px; }
+  .topbar{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px; }
+  .eyebrow{ font-size:12.5px; color:var(--text-dim); margin-bottom:6px; }
+  h1.headline{ font-family:'Fraunces', serif; font-weight:600; font-size:30px; color:#f4f0e2; }
+  h1.headline em{ font-style:italic; color:var(--gold); }
+  .locpill{ font-size:12.5px; color:var(--text-dim); background:var(--surface); border:1px solid var(--border); padding:8px 14px; border-radius:20px; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+  .grid-2{ display:grid; grid-template-columns:1.3fr 1fr; gap:20px; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; }
+  .weather-card{ background:linear-gradient(135deg, var(--surface-2), var(--surface)); display:flex; flex-direction:column; justify-content:space-between; }
+  .weather-card .temp{ font-family:'Fraunces', serif; font-size:38px; font-weight:600; }
+  .weather-card .loc{ font-size:12.5px; color:var(--text-dim); margin-top:2px; }
+  .weather-card .risk{ margin-top:14px; font-size:12px; background:rgba(201,111,91,.15); color:var(--danger); padding:6px 10px; border-radius:8px; display:inline-block; }
+  .stat-card .n{ font-family:'Fraunces', serif; font-size:26px; color:var(--gold); }
+  .stat-card .l{ font-size:12px; color:var(--text-dim); margin-top:6px; }
+  .section-title{ font-size:13.5px; color:var(--text-dim); margin:0 0 12px; }
+  .advisory-row{ display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--border); }
+  .advisory-row:last-child{ border-bottom:none; }
+  .advisory-row .left{ display:flex; gap:12px; align-items:center; }
+  .swatch{ width:6px; height:34px; border-radius:4px; }
+  .advisory-row .crop{ font-size:14.5px; }
+  .advisory-row .note{ font-size:12.5px; color:var(--text-dim); margin-top:2px; }
+  .badge{ font-size:11.5px; color:var(--text-dim); background:var(--surface-2); padding:5px 10px; border-radius:20px; }
+  .filters{ display:flex; gap:12px; margin-bottom:20px; }
+  select{ background:var(--surface); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:var(--radius-sm); font-size:13.5px; min-width:160px; cursor:pointer; }
+  
+  /* Visual Image Styles */
+  .visual-banner{
+    display:flex;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    margin-bottom:20px;
+    height:180px;
+  }
+  .visual-banner img{
+    width:240px;
+    height:100%;
+    object-fit:cover;
+    flex-shrink:0;
+  }
+  .visual-info{
+    padding:20px 24px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .visual-info .v-title{
+    font-size:14px;
+    color:var(--gold);
+    font-weight:600;
+    margin-bottom:6px;
+    text-transform:uppercase;
+  }
+  .visual-info .v-main{
+    font-family:'Fraunces', serif;
+    font-size:24px;
+    margin-bottom:6px;
+  }
+  .visual-info .v-desc{
+    font-size:13px;
+    color:var(--text-dim);
+  }
+
+  .timeline-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .tstep{ background:var(--surface); border-radius:var(--radius-sm); padding:16px; }
+  .tnum{ width:24px; height:24px; border-radius:50%; background:var(--surface-2); color:var(--gold); font-size:12px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .tstep .ttitle{ font-size:13.5px; font-weight:500; }
+  .tstep .tsub{ font-size:12px; color:var(--text-dim); margin-top:4px; }
+  .breed-row{ display:flex; gap:10px; margin-bottom:20px; }
+  .breed-chip{ background:var(--surface); border:1px solid var(--border); padding:9px 16px; border-radius:20px; font-size:13px; color:var(--text-dim); cursor:pointer; }
+  .breed-chip.active{ background:var(--soil); color:#fff; border-color:transparent; }
+  .diet-row{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .diet-row:last-child{ border-bottom:none; }
+  .diet-row .amt{ color:var(--gold); font-weight:500; }
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:12px; color:var(--text-dim); font-weight:500; padding:0 0 10px; border-bottom:1px solid var(--border); }
+  td{ padding:13px 0; border-bottom:1px solid var(--border); font-size:13.5px; }
+  td.soil-black{ color:var(--gold); }
+  tr:last-child td{ border-bottom:none; }
+  .chat-shell{ display:flex; flex-direction:column; height:calc(100vh - 170px); max-height:640px; }
+  .chat-log{ flex:1; overflow-y:auto; padding:6px 4px 12px; display:flex; flex-direction:column; gap:14px; }
+  .msg{ max-width:72%; font-size:14px; line-height:1.5; padding:12px 15px; border-radius:14px; }
+  .msg.bot{ background:var(--surface-2); align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg.user{ background:var(--soil); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg.typing{ color:var(--text-dim); font-style:italic; }
+  .suggest-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .suggest-chip{ font-size:12.5px; color:var(--text-dim); background:var(--surface); border:1px solid var(--border); padding:8px 13px; border-radius:20px; cursor:pointer; }
+  .chat-input-row{ display:flex; gap:10px; margin-top:10px; }
+  .chat-input-row input{ flex:1; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:13px 16px; border-radius:var(--radius-sm); font-size:14px; }
+  .chat-input-row button{ background:var(--gold); color:#171f16; border:none; font-weight:600; padding:0 22px; border-radius:var(--radius-sm); cursor:pointer; }
+  .ai-note{ font-size:11.5px; color:var(--text-dim); margin-top:8px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">Krishi<span>Mitra</span></div>
+    <div class="navlink active" data-view="home"><span class="ic"></span>Overview</div>
+    <div class="navlink" data-view="crops"><span class="ic"></span>Crop Advisory</div>
+    <div class="navlink" data-view="cattle"><span class="ic"></span>Cattle Care</div>
+    <div class="navlink" data-view="state"><span class="ic"></span>State Data</div>
+    <div class="navlink" data-view="ai"><span class="ic"></span>Ask Krishi Mitra</div>
+    <div class="sidebar-foot">
+      <div class="name">Ramesh Patil</div>
+      Nashik, Maharashtra
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- OVERVIEW VIEW -->
+    <div class="view active" id="home">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow">Overview</div>
+          <h1 class="headline">What's growing <em>this week</em></h1>
+        </div>
+        <div class="locpill">Nashik district · updated 6:00 AM</div>
+      </div>
+      <div class="grid-3">
+        <div class="card weather-card">
+          <div><div class="temp">31°</div><div class="loc">Partly cloudy</div></div>
+          <div class="risk">Light rain expected in 3 days</div>
+        </div>
+        <div class="card stat-card"><div class="n">3</div><div class="l">ACTIVE CROP PLOTS TRACKED</div></div>
+        <div class="card stat-card"><div class="n">12</div><div class="l">CATTLE IN HERD</div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Today's advisory</div>
+        <div class="advisory-row">
+          <div class="left"><div class="swatch" style="background:var(--gold)"></div>
+            <div><div class="crop">Cotton — irrigate today</div><div class="note">Soil moisture below optimal for boll stage</div></div>
+          </div>
+          <div class="badge">Crop</div>
+        </div>
+        <div class="advisory-row">
+          <div class="left"><div class="swatch" style="background:var(--soil)"></div>
+            <div><div class="crop">Dairy cattle — deworming due</div><div class="note">Gir breed, last dose 90 days ago</div></div>
+          </div>
+          <div class="badge">Cattle</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROPS VIEW -->
+    <div class="view" id="crops">
+      <div class="topbar">
+        <div><div class="eyebrow">Crop Advisory</div><h1 class="headline">Find your <em>sowing window</em></h1></div>
+      </div>
+      <div class="filters">
+        <select id="stateSelect">
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Karnataka">Karnataka</option>
+        </select>
+        <select id="cropSelect">
+          <option value="Wheat">Wheat</option>
+          <option value="Cotton">Cotton</option>
+          <option value="Onion">Onion</option>
+        </select>
+        <select id="seasonSelect">
+          <option value="Rabi season">Rabi season</option>
+          <option value="Kharif season">Kharif season</option>
+        </select>
+      </div>
+
+      <!-- Visual Crop Banner -->
+      <div class="visual-banner">
+        <img id="cropImg" src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80" alt="Crop preview">
+        <div class="visual-info">
+          <div class="v-title" id="cropTitle">Wheat (गेहूं / गहू)</div>
+          <div class="v-main" id="sowingWindow">Sow between Nov 5 – Nov 25</div>
+          <div class="v-desc" id="sowingNotes">Avg. rainfall 12mm · soil temp 18–22°C ideal for this district</div>
+        </div>
+      </div>
+
+      <div class="section-title">Care schedule</div>
+      <div class="timeline-grid" id="timelineGrid"></div>
+    </div>
+
+    <!-- CATTLE VIEW -->
+    <div class="view" id="cattle">
+      <div class="topbar">
+        <div><div class="eyebrow">Cattle Care</div><h1 class="headline">Diet for <em>your herd</em></h1></div>
+      </div>
+      <div class="breed-row">
+        <div class="breed-chip active" onclick="selectBreed(this, 'Gir')">Gir</div>
+        <div class="breed-chip" onclick="selectBreed(this, 'Sahiwal')">Sahiwal</div>
+        <div class="breed-chip" onclick="selectBreed(this, 'Murrah')">Murrah</div>
+        <div class="breed-chip" onclick="selectBreed(this, 'Jersey cross')">Jersey cross</div>
+      </div>
+
+      <!-- Visual Cattle Banner -->
+      <div class="visual-banner">
+        <img id="cattleImg" src="https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&w=800&q=80" alt="Cattle preview">
+        <div class="visual-info">
+          <div class="v-title">Identified Breed</div>
+          <div class="v-main" id="cattleTitle">Gir Cow (गीर गाय)</div>
+          <div class="v-desc">High heat tolerance · A2 Milk producer · Native to western India</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Daily diet · lactating, peak yield</div>
+          <div id="dietList"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Upcoming Vaccination / Checkup</div>
+          <div class="advisory-row" style="border:none; padding-top:0;">
+            <div class="left"><div class="swatch" style="background:var(--soil)"></div>
+              <div><div class="crop" id="vacName">FMD vaccination</div><div class="note" id="vacDue">Due in 12 days · herd-wide</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATE VIEW -->
+    <div class="view" id="state">
+      <div class="topbar">
+        <div><div class="eyebrow">State Data</div><h1 class="headline">Maharashtra <em>at a glance</em></h1></div>
+      </div>
+      <div class="grid-3">
+        <div class="card stat-card"><div class="n">Black</div><div class="l">DOMINANT SOIL</div></div>
+        <div class="card stat-card"><div class="n">1200mm</div><div class="l">AVG RAINFALL</div></div>
+        <div class="card stat-card"><div class="n">4</div><div class="l">AGRO ZONES</div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Browse other states</div>
+        <table>
+          <tr><th>State</th><th>Soil type</th><th>Key crops</th></tr>
+          <tr><td class="soil-black">Punjab</td><td>Alluvial</td><td>Wheat, rice</td></tr>
+          <tr><td class="soil-black">Karnataka</td><td>Red soil</td><td>Millets, coffee</td></tr>
+          <tr><td class="soil-black">Uttar Pradesh</td><td>Alluvial</td><td>Sugarcane, wheat</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI CHAT VIEW -->
+    <div class="view" id="ai">
+      <div class="topbar">
+        <div><div class="eyebrow">AI Assistant</div><h1 class="headline">Ask about <em>anything on your farm</em></h1></div>
+      </div>
+      <div class="card chat-shell">
+        <div class="suggest-row">
+          <div class="suggest-chip" onclick="askSuggested(this)">Why are my cotton leaves yellowing?</div>
+          <div class="suggest-chip" onclick="askSuggested(this)">Best fodder mix for a Gir cow in summer?</div>
+        </div>
+        <div class="chat-log" id="chatLog">
+          <div class="msg bot">Namaste! I am Krishi Mitra powered by Google Gemini. Ask me anything about your farm.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendMessage()">
+          <button id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+        <div class="ai-note">Powered by Gemini 2.5 Flash</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab Navigation
+  document.querySelectorAll('.navlink').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.navlink').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      link.classList.add('active');
+      document.getElementById(link.dataset.view).classList.add('active');
+    });
+  });
+
+  // Fetch Crop Advisory & Image
+  async function fetchCropData() {
+    const state = document.getElementById('stateSelect').value;
+    const crop = document.getElementById('cropSelect').value;
+    const season = document.getElementById('seasonSelect').value;
+
+    const res = await fetch(`/api/crops/advisory?state=${encodeURIComponent(state)}&crop=${encodeURIComponent(crop)}&season=${encodeURIComponent(season)}`);
+    const json = await res.json();
+    const data = json.data;
+
+    document.getElementById('cropTitle').textContent = data.title;
+    document.getElementById('cropImg').src = data.image;
+    document.getElementById('sowingWindow').textContent = `Sow between ${data.window}`;
+    document.getElementById('sowingNotes').textContent = data.notes;
+
+    const grid = document.getElementById('timelineGrid');
+    grid.innerHTML = '';
+    data.schedule.forEach(step => {
+      const el = document.createElement('div');
+      el.className = 'tstep';
+      el.innerHTML = `<div class="tnum">${step.step}</div><div class="ttitle">${step.title}</div><div class="tsub">${step.desc}</div>`;
+      grid.appendChild(el);
+    });
+  }
+
+  document.getElementById('stateSelect').addEventListener('change', fetchCropData);
+  document.getElementById('cropSelect').addEventListener('change', fetchCropData);
+  document.getElementById('seasonSelect').addEventListener('change', fetchCropData);
+
+  // Fetch Cattle Breed Data & Image
+  async function selectBreed(element, breedName) {
+    document.querySelectorAll('.breed-chip').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+
+    const res = await fetch(`/api/cattle/diet?breed=${encodeURIComponent(breedName)}`);
+    const json = await res.json();
+    if (json.success) {
+      const data = json.data;
+      document.getElementById('cattleTitle').textContent = data.title;
+      document.getElementById('cattleImg').src = data.image;
+
+      const dietList = document.getElementById('dietList');
+      dietList.innerHTML = '';
+      data.diet.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'diet-row';
+        row.innerHTML = `<span>${d.item}</span><span class="amt">${d.amt}</span>`;
+        dietList.appendChild(row);
+      });
+      document.getElementById('vacName').textContent = data.vaccine.name;
+      document.getElementById('vacDue').textContent = data.vaccine.due;
+    }
+  }
+
+  // Gemini AI Chat
+  function appendMsg(text, role) {
+    const log = document.getElementById('chatLog');
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    return div;
+  }
+
+  async function handleQuestion(text) {
+    if (!text.trim()) return;
+    appendMsg(text, 'user');
+    document.getElementById('chatInput').value = '';
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+    const typing = appendMsg('Thinking…', 'bot typing');
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await response.json();
+      typing.textContent = data.reply || data.error;
+      typing.classList.remove('typing');
+    } catch (err) {
+      typing.textContent = 'Service unavailable. Make sure your server is running.';
+      typing.classList.remove('typing');
+    }
+    sendBtn.disabled = false;
+  }
+
+  function sendMessage() {
+    handleQuestion(document.getElementById('chatInput').value);
+  }
+
+  function askSuggested(el) {
+    handleQuestion(el.textContent);
+  }
+
+  // Initial Data Loads
+  fetchCropData();
+  selectBreed(document.querySelector('.breed-chip.active'), 'Gir');
+</script>
+</body>
+</html>
