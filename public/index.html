@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Krishi Mitra — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">Krishi<span>Mitra</span></div>
+    <div class="navlink active" data-view="home"><span class="ic"></span>Overview</div>
+    <div class="navlink" data-view="crops"><span class="ic"></span>Crop Advisory</div>
+    <div class="navlink" data-view="cattle"><span class="ic"></span>Cattle Care</div>
+    <div class="navlink" data-view="state"><span class="ic"></span>State Data</div>
+    <div class="navlink" data-view="ai"><span class="ic"></span>Ask Krishi Mitra</div>
+    <div class="sidebar-foot">
+      <div class="name">Ramesh Patil</div>
+      Nashik, Maharashtra
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- OVERVIEW VIEW -->
+    <div class="view active" id="home">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow">Overview</div>
+          <h1 class="headline">What's growing <em>this week</em></h1>
+        </div>
+        <div class="locpill">Nashik district · updated 6:00 AM</div>
+      </div>
+      <div class="grid-3">
+        <div class="card weather-card">
+          <div><div class="temp">31°</div><div class="loc">Partly cloudy</div></div>
+          <div class="risk">Light rain expected in 3 days</div>
+        </div>
+        <div class="card stat-card"><div class="n">3</div><div class="l">ACTIVE CROP PLOTS TRACKED</div></div>
+        <div class="card stat-card"><div class="n">12</div><div class="l">CATTLE IN HERD</div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Today's advisory</div>
+        <div class="advisory-row">
+          <div class="left"><div class="swatch" style="background:var(--gold)"></div>
+            <div><div class="crop">Cotton — irrigate today</div><div class="note">Soil moisture below optimal for boll stage</div></div>
+          </div>
+          <div class="badge">Crop</div>
+        </div>
+        <div class="advisory-row">
+          <div class="left"><div class="swatch" style="background:var(--soil)"></div>
+            <div><div class="crop">Dairy cattle — deworming due</div><div class="note">Gir breed, last dose 90 days ago</div></div>
+          </div>
+          <div class="badge">Cattle</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROPS VIEW -->
+    <div class="view" id="crops">
+      <div class="topbar">
+        <div><div class="eyebrow">Crop Advisory</div><h1 class="headline">Find your <em>sowing window</em></h1></div>
+      </div>
+      <div class="filters">
+        <select id="stateSelect">
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Karnataka">Karnataka</option>
+        </select>
+        <select id="cropSelect">
+          <option value="Wheat">Wheat</option>
+          <option value="Cotton">Cotton</option>
+          <option value="Onion">Onion</option>
+        </select>
+        <select id="seasonSelect">
+          <option value="Rabi season">Rabi season</option>
+          <option value="Kharif season">Kharif season</option>
+        </select>
+      </div>
+
+      <!-- Visual Crop Banner -->
+      <div class="visual-banner">
+        <img id="cropImg" src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80" alt="Crop preview">
+        <div class="visual-info">
+          <div class="v-title" id="cropTitle">Wheat (गेहूं / गहू)</div>
+          <div class="v-main" id="sowingWindow">Sow between Nov 5 – Nov 25</div>
+          <div class="v-desc" id="sowingNotes">Avg. rainfall 12mm · soil temp 18–22°C ideal for this district</div>
+        </div>
+      </div>
+
+      <div class="section-title">Care schedule</div>
+      <div class="timeline-grid" id="timelineGrid"></div>
+    </div>
+
+    <!-- CATTLE VIEW -->
+    <div class="view" id="cattle">
+      <div class="topbar">
+        <div><div class="eyebrow">Cattle Care</div><h1 class="headline">Diet for <em>your herd</em></h1></div>
+      </div>
+      <div class="breed-row">
+        <div class="breed-chip active" onclick="selectBreed(this, 'Gir')">Gir</div>
+        <div class="breed-chip" onclick="selectBreed(this, 'Sahiwal')">Sahiwal</div>
+        <div class="breed-chip" onclick="selectBreed(this, 'Murrah')">Murrah</div>
+        <div class="breed-chip" onclick="selectBreed(this, 'Jersey cross')">Jersey cross</div>
+      </div>
+
+      <!-- Visual Cattle Banner -->
+      <div class="visual-banner">
+        <img id="cattleImg" src="https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&w=800&q=80" alt="Cattle preview">
+        <div class="visual-info">
+          <div class="v-title">Identified Breed</div>
+          <div class="v-main" id="cattleTitle">Gir Cow (गीर गाय)</div>
+          <div class="v-desc">High heat tolerance · A2 Milk producer · Native to western India</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Daily diet · lactating, peak yield</div>
+          <div id="dietList"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Upcoming Vaccination / Checkup</div>
+          <div class="advisory-row" style="border:none; padding-top:0;">
+            <div class="left"><div class="swatch" style="background:var(--soil)"></div>
+              <div><div class="crop" id="vacName">FMD vaccination</div><div class="note" id="vacDue">Due in 12 days · herd-wide</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATE VIEW -->
+    <div class="view" id="state">
+      <div class="topbar">
+        <div><div class="eyebrow">State Data</div><h1 class="headline">Maharashtra <em>at a glance</em></h1></div>
+      </div>
+      <div class="grid-3">
+        <div class="card stat-card"><div class="n">Black</div><div class="l">DOMINANT SOIL</div></div>
+        <div class="card stat-card"><div class="n">1200mm</div><div class="l">AVG RAINFALL</div></div>
+        <div class="card stat-card"><div class="n">4</div><div class="l">AGRO ZONES</div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Browse other states</div>
+        <table>
+          <tr><th>State</th><th>Soil type</th><th>Key crops</th></tr>
+          <tr><td class="soil-black">Punjab</td><td>Alluvial</td><td>Wheat, rice</td></tr>
+          <tr><td class="soil-black">Karnataka</td><td>Red soil</td><td>Millets, coffee</td></tr>
+          <tr><td class="soil-black">Uttar Pradesh</td><td>Alluvial</td><td>Sugarcane, wheat</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI CHAT VIEW -->
+    <div class="view" id="ai">
+      <div class="topbar">
+        <div><div class="eyebrow">AI Assistant</div><h1 class="headline">Ask about <em>anything on your farm</em></h1></div>
+      </div>
+      <div class="card chat-shell">
+        <div class="suggest-row">
+          <div class="suggest-chip" onclick="askSuggested(this)">Why are my cotton leaves yellowing?</div>
+          <div class="suggest-chip" onclick="askSuggested(this)">Best fodder mix for a Gir cow in summer?</div>
+        </div>
+        <div class="chat-log" id="chatLog">
+          <div class="msg bot">Namaste! I am Krishi Mitra powered by Google Gemini. Ask me anything about your farm.</div>
+        </div>
+        <div class="chat-input-row">
+  <input 
+    type="text" 
+    id="chatInput" 
+    placeholder="Type or speak your question..."
+    onkeydown="if(event.key==='Enter') sendMessage()"
+  >
+
+  <button type="button" id="micBtn" onclick="startVoice()">Mic</button>
+ 
+  <button id="sendBtn" onclick="sendMessage()">Send</button>
+</div>
+
+<div id="voiceStatus" class="ai-note">
+  Tap the microphone and speak
+</div>
+        <div class="ai-note">Powered by Gemini 3.6 Flash</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab Navigation
+  document.querySelectorAll('.navlink').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.navlink').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      link.classList.add('active');
+      document.getElementById(link.dataset.view).classList.add('active');
+    });
+  });
+
+  // Fetch Crop Advisory & Image
+  async function fetchCropData() {
+    const state = document.getElementById('stateSelect').value;
+    const crop = document.getElementById('cropSelect').value;
+    const season = document.getElementById('seasonSelect').value;
+
+    const res = await fetch(`/api/crops/advisory?state=${encodeURIComponent(state)}&crop=${encodeURIComponent(crop)}&season=${encodeURIComponent(season)}`);
+    const json = await res.json();
+    const data = json.data;
+
+    document.getElementById('cropTitle').textContent = data.title;
+    document.getElementById('cropImg').src = data.image;
+    document.getElementById('sowingWindow').textContent = `Sow between ${data.window}`;
+    document.getElementById('sowingNotes').textContent = data.notes;
+
+    const grid = document.getElementById('timelineGrid');
+    grid.innerHTML = '';
+    data.schedule.forEach(step => {
+      const el = document.createElement('div');
+      el.className = 'tstep';
+      el.innerHTML = `<div class="tnum">${step.step}</div><div class="ttitle">${step.title}</div><div class="tsub">${step.desc}</div>`;
+      grid.appendChild(el);
+    });
+  }
+
+  document.getElementById('stateSelect').addEventListener('change', fetchCropData);
+  document.getElementById('cropSelect').addEventListener('change', fetchCropData);
+  document.getElementById('seasonSelect').addEventListener('change', fetchCropData);
+
+  // Fetch Cattle Breed Data & Image
+  async function selectBreed(element, breedName) {
+    document.querySelectorAll('.breed-chip').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+
+    const res = await fetch(`/api/cattle/diet?breed=${encodeURIComponent(breedName)}`);
+    const json = await res.json();
+    if (json.success) {
+      const data = json.data;
+      document.getElementById('cattleTitle').textContent = data.title;
+      document.getElementById('cattleImg').src = data.image;
+
+      const dietList = document.getElementById('dietList');
+      dietList.innerHTML = '';
+      data.diet.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'diet-row';
+        row.innerHTML = `<span>${d.item}</span><span class="amt">${d.amt}</span>`;
+        dietList.appendChild(row);
+      });
+      document.getElementById('vacName').textContent = data.vaccine.name;
+      document.getElementById('vacDue').textContent = data.vaccine.due;
+    }
+  }
+
+  // Gemini AI Chat
+  function appendMsg(text, role) {
+    const log = document.getElementById('chatLog');
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    return div;
+  }
+
+  async function handleQuestion(text) {
+    if (!text.trim()) return;
+    appendMsg(text, 'user');
+    document.getElementById('chatInput').value = '';
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+    const typing = appendMsg('Thinking…', 'bot typing');
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await response.json();
+      typing.textContent = data.reply || data.error;
+      typing.classList.remove('typing');
+    } catch (err) {
+      typing.textContent = 'Service unavailable. Make sure your server is running.';
+      typing.classList.remove('typing');
+    }
+    sendBtn.disabled = false;
+  }
+
+  function sendMessage() {
+    handleQuestion(document.getElementById('chatInput').value);
+  }
+
+  function askSuggested(el) {
+    handleQuestion(el.textContent);
+  }
+
+  // Initial Data Loads
+  fetchCropData();
+  selectBreed(document.querySelector('.breed-chip.active'), 'Gir');
+</script>
+<script>
+const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let recognition = null;
+
+console.log("Speech Recognition:", SpeechRecognition);
+
+if (SpeechRecognition) {
+
+    recognition = new SpeechRecognition();
+
+    recognition.lang = "hi-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function () {
+        console.log("Microphone started");
+
+        document.getElementById("micBtn").textContent = "Listening...";
+        
+        document.getElementById("voiceStatus").textContent =
+            "सुन रहा हूँ... बोलिए";
+    };
+
+    recognition.onresult = function (event) {
+
+        const text = event.results[0][0].transcript;
+
+        console.log("Recognized:", text);
+
+        document.getElementById("chatInput").value = text;
+
+        document.getElementById("voiceStatus").textContent =
+            "आपने कहा: " + text;
+
+        // Send voice question to Gemini
+        handleQuestion(text);
+    };
+
+    recognition.onerror = function (event) {
+
+        console.error("Speech error:", event.error);
+
+        document.getElementById("micBtn").textContent = "Mic";
+
+        if (event.error === "not-allowed") {
+
+            document.getElementById("voiceStatus").textContent =
+                "Microphone permission denied";
+
+            alert("Please allow microphone permission in your browser.");
+
+        } else if (event.error === "no-speech") {
+
+            document.getElementById("voiceStatus").textContent =
+                "कोई आवाज़ नहीं मिली। फिर से बोलिए";
+
+        } else {
+
+            document.getElementById("voiceStatus").textContent =
+                "Mic error: " + event.error;
+        }
+    };
+
+    recognition.onend = function () {
+
+        console.log("Microphone stopped");
+
+        document.getElementById("micBtn").textContent = "Mic";
+
+    };
+
+} else {
+
+    console.error("Speech Recognition NOT supported");
+
+    document.getElementById("voiceStatus").textContent =
+        "Speech recognition not supported";
+}
+
+
+function startVoice() {
+
+    console.log("Mic button clicked");
+
+    if (!recognition) {
+
+        alert(
+            "Speech recognition is not supported in this browser. Try Google Chrome or Microsoft Edge."
+        );
+
+        return;
+    }
+
+    try {
+
+        recognition.start();
+
+        console.log("Starting microphone...");
+
+    } catch (error) {
+
+        console.error("Could not start microphone:", error);
+
+    }
+}
+</script>
+</body>
+</html>
